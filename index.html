@@ -732,6 +732,68 @@ html,body{height:100%;background:var(--ink);font-family:'DM Sans',sans-serif;col
 
   </div><!-- /screen-professionnel -->
 
+
+  <div class="screen" id="screen-edl">
+    <section class="section" data-bail="edl" data-index="0">
+      <div class="card"><div class="card-header"><div class="card-icon" style="background:#E05252"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><div><div class="card-title">Type</div></div></div>
+      <div class="chips" id="edl-type-chips"><div class="chip active" onclick="selectEDLType(this,'entree')">Entrée</div><div class="chip" onclick="selectEDLType(this,'sortie')">Sortie</div><div class="chip" onclick="selectEDLType(this,'comparatif')">Comparatif</div></div>
+      <div class="field" style="margin-top:12px"><label>Date</label><input type="date" id="edl-date"></div>
+      <div class="field"><label>Adresse</label><input type="text" placeholder="Adresse du logement" id="edl-adresse"></div></div>
+      <div class="card"><div class="card-header"><div class="card-icon ic-dark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="card-title">Bailleur</div></div></div>
+      <div class="field-row"><div class="field"><label>Nom</label><input type="text" placeholder="Dupont" id="edl-bailleur-nom"></div><div class="field"><label>Prénom</label><input type="text" placeholder="Marie" id="edl-bailleur-prenom"></div></div>
+      <div class="field"><label>Téléphone</label><input type="tel" id="edl-bailleur-tel"></div></div>
+      <div class="card"><div class="card-header"><div class="card-icon ic-blue"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="card-title">Locataire</div></div></div>
+      <div class="field-row"><div class="field"><label>Nom</label><input type="text" placeholder="Martin" id="edl-locataire-nom"></div><div class="field"><label>Prénom</label><input type="text" placeholder="Lucas" id="edl-locataire-prenom"></div></div>
+      <div class="field"><label>Téléphone</label><input type="tel" id="edl-locataire-tel"></div></div>
+      <div class="sec-divider"><span>Pièces d identité</span></div>
+      <div class="card"><div class="card-header"><div class="card-icon" style="background:linear-gradient(135deg,#1B6CA8,#0D1B2A)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M14 9h4M14 13h3"/></svg></div><div><div class="card-title">Carte d identité</div></div></div>
+      <div class="id-trigger-wrap">
+        <div class="id-trigger" id="id-trig-edl-bailleur" onclick="openCamera('edl-bailleur')"><div class="id-trigger-icon"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><img class="id-trigger-img" id="id-thumb-edl-bailleur" alt=""><div class="id-badge">✓</div><div class="id-trigger-label">Bailleur</div></div>
+        <div class="id-trigger" id="id-trig-edl-locataire" onclick="openCamera('edl-locataire')"><div class="id-trigger-icon"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><img class="id-trigger-img" id="id-thumb-edl-locataire" alt=""><div class="id-badge">✓</div><div class="id-trigger-label">Locataire</div></div>
+      </div></div>
+    </section>
+    <section class="section" data-bail="edl" data-index="1">
+      <div class="card"><div class="card-header"><div class="card-icon ic-orange"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="card-title">Compteurs</div></div></div>
+      <div class="field"><label>Électricité (kWh)</label><input type="number" placeholder="00000" id="edl-elec"></div>
+      <div class="field"><label>Gaz (m3)</label><input type="number" placeholder="00000" id="edl-gaz"></div>
+      <div class="field"><label>Eau froide (m3)</label><input type="number" placeholder="00000" id="edl-eau-froide"></div>
+      <div class="field"><label>Eau chaude (m3)</label><input type="number" placeholder="00000" id="edl-eau-chaude"></div>
+      <div class="sec-divider"><span>Photos compteurs</span></div>
+      <div class="id-trigger-wrap">
+        <div class="id-trigger" id="trig-compteur-elec" onclick="openDocCamera('thumb-compteur-elec')"><div class="id-trigger-icon"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><img class="id-trigger-img" id="thumb-compteur-elec" alt=""><div class="id-badge">✓</div><div class="id-trigger-label">Elec</div></div>
+        <div class="id-trigger" id="trig-compteur-eau" onclick="openDocCamera('thumb-compteur-eau')"><div class="id-trigger-icon"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><img class="id-trigger-img" id="thumb-compteur-eau" alt=""><div class="id-badge">✓</div><div class="id-trigger-label">Eau</div></div>
+      </div></div>
+      <div class="card"><div class="card-header"><div class="card-icon ic-dark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div><div><div class="card-title">Clés</div></div></div>
+      <div class="field"><label>Nombre de clés</label><input type="number" placeholder="2" id="edl-cles"></div>
+      <div class="field"><label>Badges / Digicode</label><input type="text" placeholder="1 badge, code: 1234" id="edl-badges"></div>
+      <div class="field"><label>Boite aux lettres</label><input type="text" placeholder="1 cle BAL n12" id="edl-bal"></div></div>
+    </section>
+    <section class="section" data-bail="edl" data-index="2">
+      <div class="info-banner"><svg viewBox="0 0 24 24" style="stroke:var(--sky);fill:none;stroke-width:2;flex-shrink:0;width:16px;height:16px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>Notez l etat de chaque piece et ajoutez des photos.</p></div>
+      <div id="edl-pieces-list"></div>
+      <button onclick="addPiece()" style="width:100%;padding:12px;border:1.5px dashed var(--border);border-radius:var(--r-sm);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--sky);cursor:pointer;margin-top:4px">+ Ajouter une piece</button>
+    </section>
+    <section class="section" data-bail="edl" data-index="3">
+      <div class="card"><div class="card-header"><div class="card-icon ic-dark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div><div><div class="card-title">Observations</div></div></div>
+      <div class="field"><label>Observations bailleur</label><textarea placeholder="Remarques..." id="edl-obs-bailleur"></textarea></div>
+      <div class="field"><label>Observations locataire</label><textarea placeholder="Reserves..." id="edl-obs-locataire"></textarea></div></div>
+      <div class="card"><div class="card-header"><div class="card-icon" style="background:#E05252"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><polyline points="9 11 12 14 22 4"/></svg></div><div><div class="card-title">Recapitulatif</div></div></div>
+      <div class="summary-line"><span class="sl-label">Type</span><span class="sl-value" id="edl-recap-type">-</span></div>
+      <div class="summary-line"><span class="sl-label">Date</span><span class="sl-value" id="edl-recap-date">-</span></div>
+      <div class="summary-line"><span class="sl-label">Adresse</span><span class="sl-value" id="edl-recap-adresse">-</span></div>
+      <div class="summary-line"><span class="sl-label">Bailleur</span><span class="sl-value" id="edl-recap-bailleur">-</span></div>
+      <div class="summary-line"><span class="sl-label">Locataire</span><span class="sl-value" id="edl-recap-locataire">-</span></div>
+      <div class="summary-total" style="background:linear-gradient(135deg,#E05252,#8a1010)"><span class="st-label">Etat des lieux</span><span class="st-amount" id="edl-recap-nb-pieces">0 pieces</span></div></div>
+      <div class="card"><div class="card-header"><div class="card-icon ic-dark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></div><div><div class="card-title">Signature Bailleur</div></div></div>
+      <div class="sig-pad-wrap"><canvas class="sig-canvas" id="sig-edl-bailleur"></canvas><div class="sig-placeholder" id="ph-edl-bailleur"><svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg><span>Signez ici</span></div></div>
+      <div class="sig-actions"><button class="btn-sm" onclick="clearSig('sig-edl-bailleur','ph-edl-bailleur')">Effacer</button><button class="btn-sm primary" onclick="validateSig('sig-edl-bailleur','ph-edl-bailleur')">Valider</button></div></div>
+      <div class="card"><div class="card-header"><div class="card-icon ic-blue"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></div><div><div class="card-title">Signature Locataire</div></div></div>
+      <div class="sig-pad-wrap"><canvas class="sig-canvas" id="sig-edl-locataire"></canvas><div class="sig-placeholder" id="ph-edl-locataire"><svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg><span>Signez ici</span></div></div>
+      <div class="sig-actions"><button class="btn-sm" onclick="clearSig('sig-edl-locataire','ph-edl-locataire')">Effacer</button><button class="btn-sm primary" onclick="validateSig('sig-edl-locataire','ph-edl-locataire')">Valider</button></div></div>
+      <div class="field-row" style="margin:0"><div class="field" style="margin:0"><label>Lieu</label><input type="text" placeholder="Paris" id="edl-lieu"></div><div class="field" style="margin:0"><label>Date signature</label><input type="date" id="edl-date-sig"></div></div>
+    </section>
+  </div>
+
 </div><!-- /scroll -->
 
 <!-- BOTTOM NAV -->
