@@ -1291,11 +1291,12 @@ async function generatePDF() {
   showToast('✓ PDF téléchargé !');
 }
 
+
+function selectEDLType(el,t){edlType=t;document.querySelectorAll('#edl-type-chips .chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
 function startEDL(){activeBail='edl';current=0;edlPieces=PIECES_DEFAULT.map((p,i)=>({...p,id:i,etat:'Bon',obs:'',photos:[]}));pieceCounter=PIECES_DEFAULT.length;const cfg=BAIL_CONFIG['edl'];document.getElementById('nav-title').textContent=cfg.name;document.getElementById('btn-next').style.background='linear-gradient(135deg,'+cfg.color+',#0D1B2A 130%)';document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-edl').classList.add('active');document.getElementById('topnav').style.display='block';document.getElementById('progress-wrap').style.display='block';document.getElementById('bottomnav').style.display='flex';renderPieces();showSection();initAllSignatures();setTodayDates();}
 BAIL_CONFIG['edl']={name:'Etat des Lieux',color:'#E05252',steps:['Parties','Compteurs','Pieces','Signatures']};
 const PIECES_DEFAULT=[{nom:'Entree',icone:'🚪'},{nom:'Salon',icone:'🛋️'},{nom:'Cuisine',icone:'🍳'},{nom:'Chambre 1',icone:'🛏️'},{nom:'Salle de bain',icone:'🚿'},{nom:'WC',icone:'🚽'}];
 let edlPieces=[],edlType='entree',pieceCounter=0,currentPieceId=null;
-function selectEDLType(el,t){edlType=t;document.querySelectorAll('#edl-type-chips .chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
 function addPiece(){const n=['Chambre 2','Bureau','Cave','Garage','Terrasse'];edlPieces.push({id:pieceCounter++,nom:n[pieceCounter%n.length]||'Piece',icone:'🏠',etat:'Bon',obs:'',photos:[]});renderPieces();}
 function removePiece(id){edlPieces=edlPieces.filter(p=>p.id!==id);renderPieces();}
 function setPieceEtat(id,e,el){const p=edlPieces.find(p=>p.id===id);if(p)p.etat=e;el.closest('.chips').querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
