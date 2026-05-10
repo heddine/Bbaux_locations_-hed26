@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0D1B2A">
+<title>Baux de Location</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0D1B2A; --ink-soft:#2C4A6B; --sky:#1B6CA8; --sky-light:#4A9FD4;
+  --accent:#E8A838; --surface:#F4F7FB; --card:#FFFFFF; --muted:#8BA3BE;
+  --border:#D4E2EE; --danger:#E05252; --success:#38A87A;
+  --r:14px; --r-sm:8px;
+  --shadow:0 2px 16px rgba(13,27,42,.10);
+  --safe-b:env(safe-area-inset-bottom,16px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--ink);font-family:'DM Sans',sans-serif;color:var(--ink);overscroll-behavior:none}
+#app{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto;background:var(--surface);position:relative;overflow:hidden}
+
+/* STATUS BAR */
+#statusbar{background:var(--ink);height:28px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0}
+#statusbar span{color:#fff;font-size:11px;font-weight:600}
+.sb-icons{display:flex;gap:6px;align-items:center}
+.sb-icons svg{width:14px;height:14px;fill:#fff}
+
+/* TOP NAV */
+#topnav{background:var(--ink);padding:0 20px 16px;flex-shrink:0;display:none}
+.topnav-inner{display:flex;align-items:center;justify-content:space-between}
+.topnav-title{font-family:'DM Serif Display',serif;font-size:22px;color:#fff}
+.topnav-sub{font-size:11px;color:var(--muted);margin-top:1px;letter-spacing:.5px;text-transform:uppercase}
+.btn-icon{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+.btn-icon:active{background:rgba(255,255,255,.18)}
+.btn-icon svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* PROGRESS */
+#progress-wrap{background:var(--ink);padding:0 20px 18px;flex-shrink:0;display:none}
+.progress-steps{display:flex;gap:5px}
+.progress-step{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.12);transition:background .3s}
+.progress-step.done{background:var(--accent)}
+.progress-step.active{background:var(--sky-light)}
+.progress-label{display:flex;justify-content:space-between;margin-top:6px}
+.progress-label span{font-size:10px;color:var(--muted);letter-spacing:.4px}
+.progress-label .p-cur{color:var(--sky-light);font-weight:600}
+
+/* SCROLL */
+#scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 24px;scroll-behavior:smooth}
+#scroll::-webkit-scrollbar{display:none}
+
+/* SCREENS */
+.screen{display:none;animation:fadeUp .25s ease both}
+.screen.active{display:block}
+.section{display:none;animation:fadeUp .25s ease both}
+.section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── HOME SCREEN ── */
+#screen-home{padding:0}
+.home-hero{background:linear-gradient(160deg,var(--ink) 0%,#1a3a5c 100%);padding:32px 24px 28px;position:relative;overflow:hidden}
+.home-hero::after{content:'';position:absolute;right:-40px;top:-40px;width:200px;height:200px;border-radius:50%;background:rgba(27,108,168,.15);pointer-events:none}
+.home-logo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--sky),var(--sky-light));display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.home-logo svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.home-title{font-family:'DM Serif Display',serif;font-size:28px;color:#fff;line-height:1.1;margin-bottom:6px}
+.home-sub{font-size:13px;color:rgba(255,255,255,.55);line-height:1.5}
+.bail-grid{padding:20px 16px;display:grid;gap:12px}
+.bail-card{background:var(--card);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .15s,box-shadow .15s;border:1.5px solid transparent;position:relative;overflow:hidden}
+.bail-card:active{transform:scale(.98);box-shadow:var(--shadow)}
+.bail-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:4px 0 0 4px}
+.bail-card.t-vide::before{background:var(--sky)}
+.bail-card.t-meuble::before{background:var(--success)}
+.bail-card.t-commercial::before{background:var(--accent)}
+.bail-card.t-professionnel::before{background:#9B59B6}
+.bail-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bail-icon svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bail-info{flex:1}
+.bail-name{font-family:'DM Serif Display',serif;font-size:16px;color:var(--ink);margin-bottom:3px}
+.bail-meta{font-size:11px;color:var(--muted);line-height:1.4}
+.bail-arrow{width:28px;height:28px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bail-arrow svg{width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.bail-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-top:4px;letter-spacing:.3px}
+
+/* CARD */
+.card{background:var(--card);border-radius:var(--r);padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.card-icon{width:36px;height:36px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.card-icon svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.card-title{font-family:'DM Serif Display',serif;font-size:16px;color:var(--ink)}
+.card-sub{font-size:11px;color:var(--muted);margin-top:1px}
+
+/* FIELD */
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--sky);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:11px 13px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s;appearance:none;-webkit-appearance:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(27,108,168,.12)}
+.field textarea{resize:none;min-height:80px;line-height:1.5}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238BA3BE' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:36px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field-row .field{margin-bottom:0}
+.amount-field{position:relative}
+.amount-field input{padding-left:36px;font-size:16px;font-weight:600}
+.amount-field .currency{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:14px;font-weight:600;color:var(--sky);pointer-events:none}
+
+/* TOGGLE */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--surface)}
+.toggle-row:last-child{border-bottom:none;padding-bottom:0}
+.toggle-row:first-child{padding-top:0}
+.toggle-info .t-label{font-size:13px;font-weight:500;color:var(--ink)}
+.toggle-info .t-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:var(--border);border-radius:12px;transition:background .2s;cursor:pointer}
+.slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.toggle input:checked+.slider{background:var(--sky)}
+.toggle input:checked+.slider::before{transform:translateX(20px)}
+
+/* CHIPS */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.chip{padding:6px 13px;border-radius:20px;border:1.5px solid var(--border);font-size:12px;font-weight:500;color:var(--ink-soft);background:var(--surface);cursor:pointer;transition:all .15s;user-select:none}
+.chip.active{background:var(--sky);border-color:var(--sky);color:#fff}
+.chip:active{transform:scale(.96)}
+
+/* CHECKLIST */
+.checklist-item{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid var(--surface);cursor:pointer}
+.checklist-item:last-child{border-bottom:none;padding-bottom:0}
+.checklist-item:first-child{padding-top:0}
+.check-box{width:20px;height:20px;border-radius:6px;border:2px solid var(--border);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.check-box.checked{background:var(--sky);border-color:var(--sky)}
+.check-box.checked::after{content:'';width:10px;height:6px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translateY(-1px);display:block}
+.check-text .ct-title{font-size:13px;font-weight:500;color:var(--ink)}
+.check-text .ct-sub{font-size:11px;color:var(--muted);margin-top:1px}
+
+/* INFO BANNER */
+.info-banner{background:rgba(27,108,168,.08);border-left:3px solid var(--sky);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:10px 12px;margin-bottom:12px;display:flex;gap:8px;align-items:flex-start}
+.info-banner svg{width:16px;height:16px;stroke:var(--sky);fill:none;stroke-width:2;flex-shrink:0;margin-top:1px}
+.info-banner p{font-size:12px;color:var(--ink-soft);line-height:1.5}
+.info-banner.warn{background:rgba(232,168,56,.10);border-color:var(--accent)}
+.info-banner.warn svg{stroke:var(--accent)}
+.info-banner.warn p{color:#7a5a10}
+
+/* SECTION DIVIDER */
+.sec-divider{display:flex;align-items:center;gap:8px;margin:18px 0 10px}
+.sec-divider::before,.sec-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.sec-divider span{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.6px;text-transform:uppercase;white-space:nowrap}
+
+/* SUMMARY */
+.summary-line{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--surface)}
+.summary-line:last-child{border-bottom:none}
+.sl-label{font-size:12px;color:var(--muted)}
+.sl-value{font-size:13px;font-weight:600;color:var(--ink);text-align:right;max-width:60%}
+.summary-total{border-radius:var(--r-sm);padding:14px 16px;margin-top:12px;display:flex;justify-content:space-between;align-items:center}
+.summary-total .st-label{font-size:12px;color:rgba(255,255,255,.7)}
+.summary-total .st-amount{font-family:'DM Serif Display',serif;font-size:22px;color:#fff}
+
+/* SIGNATURE */
+.sig-pad-wrap{border:1.5px dashed var(--border);border-radius:var(--r-sm);overflow:hidden;position:relative;background:var(--surface)}
+.sig-canvas{display:block;width:100%;height:140px;touch-action:none;cursor:crosshair}
+.sig-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;pointer-events:none;transition:opacity .2s}
+.sig-placeholder svg{width:28px;height:28px;stroke:var(--muted);fill:none;stroke-width:1.5}
+.sig-placeholder span{font-size:12px;color:var(--muted)}
+.sig-actions{display:flex;gap:8px;margin-top:8px}
+.btn-sm{flex:1;padding:9px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer;transition:all .15s}
+.btn-sm:active{background:var(--border)}
+.btn-sm.primary{background:var(--sky);border-color:var(--sky);color:#fff}
+
+/* BOTTOM NAV */
+#bottomnav{background:var(--card);border-top:1px solid var(--border);padding:12px 16px;padding-bottom:calc(12px + var(--safe-b));display:none;gap:10px;flex-shrink:0;box-shadow:0 -4px 20px rgba(13,27,42,.08)}
+.btn-back{width:48px;height:48px;border-radius:var(--r-sm);border:1.5px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s}
+.btn-back:active{background:var(--border)}
+.btn-back svg{width:20px;height:20px;stroke:var(--ink-soft);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn-next{flex:1;height:48px;border-radius:var(--r-sm);background:linear-gradient(135deg,var(--sky) 0%,var(--ink) 120%);border:none;color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s,transform .1s;letter-spacing:.2px}
+.btn-next:active{opacity:.9;transform:scale(.99)}
+.btn-next svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* COLORS */
+.ic-blue{background:var(--sky)} .ic-green{background:var(--success)} .ic-orange{background:var(--accent)}
+.ic-dark{background:var(--ink-soft)} .ic-red{background:var(--danger)} .ic-purple{background:#9B59B6}
+
+/* TOAST */
+#toast{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:500;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s;z-index:99}
+#toast.show{opacity:1}
+
+/* ── CAMERA ── */
+.id-modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.88);z-index:200;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .25s}
+.id-modal-overlay.open{opacity:1;pointer-events:all}
+.id-modal-header{padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between}
+.id-modal-title{font-family:'DM Serif Display',serif;font-size:18px;color:#fff}
+.id-modal-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px}
+.id-close{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.12);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;line-height:1}
+.id-viewfinder{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#id-video{width:100%;height:100%;object-fit:cover;display:block}
+#id-photo-preview{width:100%;height:100%;object-fit:cover;display:none}
+.id-frame-overlay{position:absolute;inset:0;pointer-events:none}
+.id-frame{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:82%;max-width:320px;aspect-ratio:85.6/54;border:2px solid rgba(255,255,255,.8);border-radius:12px;box-shadow:0 0 0 2000px rgba(0,0,0,.45)}
+.id-frame::before,.id-frame::after,.id-frame-inner::before,.id-frame-inner::after{content:'';position:absolute;width:18px;height:18px;border-color:var(--accent);border-style:solid}
+.id-frame::before{top:-2px;left:-2px;border-width:3px 0 0 3px;border-radius:10px 0 0 0}
+.id-frame::after{top:-2px;right:-2px;border-width:3px 3px 0 0;border-radius:0 10px 0 0}
+.id-frame-inner::before{bottom:-2px;left:-2px;border-width:0 0 3px 3px;border-radius:0 0 0 10px}
+.id-frame-inner::after{bottom:-2px;right:-2px;border-width:0 3px 3px 0;border-radius:0 0 10px 0}
+.id-frame-inner{position:absolute;inset:0}
+.id-hint{position:absolute;bottom:14px;left:0;right:0;text-align:center;font-size:12px;color:rgba(255,255,255,.7);letter-spacing:.3px}
+.id-scan-line{position:absolute;left:9%;right:9%;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:1px;animation:scanLine 2s ease-in-out infinite;top:20%}
+@keyframes scanLine{0%{top:18%;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:82%;opacity:0}}
+.id-controls{padding:16px;display:flex;flex-direction:column;gap:10px;background:#000}
+.id-party-tabs{display:flex;gap:8px}
+.id-tab{flex:1;padding:8px;border-radius:var(--r-sm);border:1.5px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.5);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;text-align:center}
+.id-tab.active{background:var(--sky);border-color:var(--sky);color:#fff}
+.id-btns{display:flex;gap:10px;align-items:center}
+.id-btn-flip{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.1);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s}
+.id-btn-flip svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.id-btn-capture{flex:1;height:52px;border-radius:26px;background:linear-gradient(135deg,var(--sky),var(--ink) 130%);border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px}
+.id-btn-capture svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.id-btn-retake{flex:1;height:52px;border-radius:26px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:#fff}
+.id-btn-confirm{flex:1;height:52px;border-radius:26px;background:linear-gradient(135deg,var(--success),#1a7a54 130%);border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;gap:6px}
+.id-trigger-wrap{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.id-trigger{position:relative;border:1.5px dashed var(--border);border-radius:var(--r-sm);background:var(--surface);padding:14px 10px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:border-color .15s;overflow:hidden}
+.id-trigger:active{background:var(--border)}
+.id-trigger.captured{border-color:var(--success);border-style:solid}
+.id-trigger-img{width:100%;aspect-ratio:85.6/54;border-radius:6px;object-fit:cover;display:none}
+.id-trigger.captured .id-trigger-img{display:block}
+.id-trigger.captured .id-trigger-icon{display:none}
+.id-trigger.captured .id-trigger-label{color:var(--success)}
+.id-trigger-icon svg{width:28px;height:28px;stroke:var(--muted);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.id-trigger-label{font-size:11px;font-weight:600;color:var(--muted);text-align:center;letter-spacing:.3px}
+.id-badge{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--success);display:none;align-items:center;justify-content:center;font-size:10px;color:#fff}
+.id-trigger.captured .id-badge{display:flex}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- STATUS BAR -->
+<div id="statusbar">
+  <span id="sb-time">09:41</span>
+  <div class="sb-icons">
+    <svg viewBox="0 0 16 12"><rect x="0" y="8" width="3" height="4" rx=".5"/><rect x="4.5" y="5" width="3" height="7" rx=".5"/><rect x="9" y="2" width="3" height="10" rx=".5"/></svg>
+    <svg viewBox="0 0 16 12"><path d="M8 10a1 1 0 100 2 1 1 0 000-2z"/><path d="M5.17 7.17a4 4 0 015.66 0" stroke-width="1.5" fill="none" stroke="#fff" stroke-linecap="round"/><path d="M2.34 4.34a8 8 0 0111.32 0" stroke-width="1.5" fill="none" stroke="#fff" stroke-linecap="round"/></svg>
+    <svg viewBox="0 0 22 12"><rect x="0" y="1" width="18" height="10" rx="2" stroke="#fff" stroke-width="1.2" fill="none"/><rect x="18.5" y="4" width="2" height="4" rx="1" fill="#fff"/><rect x="1.5" y="2.5" width="13" height="7" rx="1" fill="#fff"/></svg>
+  </div>
+</div>
+
+<!-- TOP NAV -->
+<div id="topnav">
+  <div class="topnav-inner">
+    <div>
+      <div class="topnav-title" id="nav-title">Bail</div>
+      <div class="topnav-sub" id="section-label">—</div>
+    </div>
+    <button class="btn-icon" onclick="backToHome()">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div id="progress-wrap">
+  <div class="progress-steps" id="progress-steps"></div>
+  <div class="progress-label">
+    <span class="p-cur" id="p-step">Étape 1</span>
+    <span id="p-name"></span>
+  </div>
+</div>
+
+<!-- SCROLL -->
+<div id="scroll">
+
+  <!-- ════════════════════════════════════════════════
+       HOME — Choix du type de bail
+  ════════════════════════════════════════════════ -->
+  <div class="screen active" id="screen-home">
+    <div class="home-hero">
+      <div class="home-logo">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div class="home-title">Baux de<br>Location</div>
+      <div class="home-sub">Choisissez le type de contrat à établir</div>
+    </div>
+    <div class="bail-grid">
+
+      <div class="bail-card t-vide" onclick="startBail('vide')">
+        <div class="bail-icon" style="background:var(--sky)">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div class="bail-info">
+          <div class="bail-name">Bail vide</div>
+          <div class="bail-meta">Usage d'habitation principale</div>
+          <span class="bail-badge" style="background:rgba(27,108,168,.12);color:var(--sky)">3 ans · Loi 1989</span>
+        </div>
+        <div class="bail-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+
+      <div class="bail-card t-meuble" onclick="startBail('meuble')">
+        <div class="bail-icon" style="background:var(--success)">
+          <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-4 0v2M8 7V5a2 2 0 014 0v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+        </div>
+        <div class="bail-info">
+          <div class="bail-name">Bail meublé</div>
+          <div class="bail-meta">Logement avec mobilier complet</div>
+          <span class="bail-badge" style="background:rgba(56,168,122,.12);color:var(--success)">1 an · Loi 1989</span>
+        </div>
+        <div class="bail-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+
+      <div class="bail-card t-commercial" onclick="startBail('commercial')">
+        <div class="bail-icon" style="background:var(--accent)">
+          <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/><rect x="9" y="2" width="6" height="4"/></svg>
+        </div>
+        <div class="bail-info">
+          <div class="bail-name">Bail commercial</div>
+          <div class="bail-meta">Activité commerciale ou artisanale</div>
+          <span class="bail-badge" style="background:rgba(232,168,56,.15);color:#a0700a">3-6-9 ans · Statut commercial</span>
+        </div>
+        <div class="bail-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+
+      <div class="bail-card t-professionnel" onclick="startBail('professionnel')">
+        <div class="bail-icon" style="background:#9B59B6">
+          <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg>
+        </div>
+        <div class="bail-info">
+          <div class="bail-name">Bail professionnel</div>
+          <div class="bail-meta">Professions libérales réglementées</div>
+          <span class="bail-badge" style="background:rgba(155,89,182,.12);color:#7d3faa">6 ans · Non commercial</span>
+        </div>
+        <div class="bail-arrow"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+      </div>
+
+    </div>
+  </div><!-- /home -->
+
+  <!-- ════════════════════════════════════════════════
+       BAIL VIDE — sections dynamiques
+  ════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-vide">
+
+    <section class="section" data-bail="vide" data-index="0"><!-- Parties -->
+      <div class="info-banner"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>Bail d'habitation vide — loi n° 89-462 du 6 juillet 1989.</p></div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-dark"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="card-title">Le Bailleur</div><div class="card-sub">Propriétaire</div></div></div>
+        <div class="field-row"><div class="field"><label>Nom</label><input type="text" placeholder="Dupont"></div><div class="field"><label>Prénom</label><input type="text" placeholder="Marie"></div></div>
+        <div class="field"><label>Date de naissance</label><input type="date"></div>
+        <div class="field"><label>Adresse</label><input type="text" placeholder="12 rue des Lilas"></div>
+        <div class="field-row"><div class="field"><label>Code postal</label><input type="text" inputmode="numeric" placeholder="75001"></div><div class="field"><label>Ville</label><input type="text" placeholder="Paris"></div></div>
+        <div class="field"><label>Téléphone</label><input type="tel" placeholder="+33 6 00 00 00 00"></div>
+        <div class="field"><label>E-mail</label><input type="email" placeholder="bailleur@email.fr"></div>
+        <div class="field"><label>IBAN</label><input type="text" placeholder="FR76 …"></div>
+      </div>
+      <div class="sec-divider"><span>Locataire</span></div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-blue"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="card-title">Le Locataire</div><div class="card-sub">Occupant</div></div></div>
+        <div class="field-row"><div class="field"><label>Nom</label><input type="text" placeholder="Martin"></div><div class="field"><label>Prénom</label><input type="text" placeholder="Lucas"></div></div>
+        <div class="field"><label>Date de naissance</label><input type="date"></div>
+        <div class="field"><label>Adresse actuelle</label><input type="text" placeholder="Adresse avant emménagement"></div>
+        <div class="field-row"><div class="field"><label>Code postal</label><input type="text" inputmode="numeric" placeholder="69001"></div><div class="field"><label>Ville</label><input type="text" placeholder="Lyon"></div></div>
+        <div class="field"><label>Téléphone</label><input type="tel" placeholder="+33 6 00 00 00 00"></div>
+        <div class="field"><label>E-mail</label><input type="email" placeholder="locataire@email.fr"></div>
+      </div>
+      <div class="sec-divider"><span>Pièces d'identité</span></div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon" style="background:linear-gradient(135deg,var(--sky),var(--ink))"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M14 9h4M14 13h3"/><path d="M6 15c0-1.1.9-2 2-2s2 .9 2 2"/></svg></div><div><div class="card-title">Carte d'identité</div><div class="card-sub">Photographiez les CNI / passeports</div></div></div>
+        <div class="id-trigger-wrap">
+          <div class="id-trigger" id="id-trig-bailleur" onclick="openCamera('bailleur')"><div class="id-trigger-icon"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><img class="id-trigger-img" id="id-thumb-bailleur" alt=""><div class="id-badge">✓</div><div class="id-trigger-label">Bailleur</div></div>
+          <div class="id-trigger" id="id-trig-locataire" onclick="openCamera('locataire')"><div class="id-trigger-icon"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><img class="id-trigger-img" id="id-thumb-locataire" alt=""><div class="id-badge">✓</div><div class="id-trigger-label">Locataire</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" data-bail="vide" data-index="1"><!-- Logement -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-blue"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div><div class="card-title">Le Logement</div><div class="card-sub">Adresse et caractéristiques</div></div></div>
+        <div class="field"><label>Adresse complète</label><input type="text" placeholder="15 avenue Victor Hugo, Bât. A"></div>
+        <div class="field-row"><div class="field"><label>Code postal</label><input type="text" inputmode="numeric" placeholder="75016"></div><div class="field"><label>Ville</label><input type="text" placeholder="Paris"></div></div>
+        <div class="field-row"><div class="field"><label>Étage</label><input type="text" placeholder="3ème"></div><div class="field"><label>N° porte</label><input type="text" placeholder="12"></div></div>
+        <div class="field"><label>Type de bien</label><select><option>Appartement</option><option>Maison</option><option>Studio</option></select></div>
+        <div class="field-row"><div class="field"><label>Surface (m²)</label><input type="number" placeholder="52"></div><div class="field"><label>Nb pièces</label><input type="number" placeholder="3"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-green"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><div><div class="card-title">Équipements &amp; Annexes</div></div></div>
+        <div class="chips">
+          <div class="chip" onclick="toggleChip(this)">Cave</div><div class="chip" onclick="toggleChip(this)">Parking</div><div class="chip" onclick="toggleChip(this)">Grenier</div><div class="chip" onclick="toggleChip(this)">Balcon</div><div class="chip" onclick="toggleChip(this)">Terrasse</div><div class="chip" onclick="toggleChip(this)">Jardin</div><div class="chip" onclick="toggleChip(this)">Digicode</div><div class="chip" onclick="toggleChip(this)">Interphone</div><div class="chip" onclick="toggleChip(this)">Fibre optique</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" data-bail="vide" data-index="2"><!-- Durée -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-orange"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="card-title">Durée du Bail</div><div class="card-sub">3 ans — Tacite reconduction</div></div></div>
+        <div class="info-banner"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>Le bail vide est conclu pour <strong>3 ans minimum</strong> avec tacite reconduction.</p></div>
+        <div class="field-row"><div class="field"><label>Entrée dans les lieux</label><input type="date"></div><div class="field"><label>Fin du contrat</label><input type="date"></div></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Zone tendue</div><div class="t-sub">Préavis locataire réduit à 1 mois</div></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Tacite reconduction</div><div class="t-sub">Renouvellement automatique</div></div><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+      </div>
+    </section>
+
+    <section class="section" data-bail="vide" data-index="3"><!-- Finances -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-green"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div><div class="card-title">Loyer &amp; Charges</div></div></div>
+        <div class="field"><label>Loyer hors charges</label><div class="amount-field"><span class="currency">€</span><input type="number" placeholder="850"></div></div>
+        <div class="field"><label>Provision sur charges</label><div class="amount-field"><span class="currency">€</span><input type="number" placeholder="80"></div></div>
+        <div class="field"><label>Mode de paiement</label><select><option>Virement bancaire</option><option>Chèque</option><option>Prélèvement</option></select></div>
+        <div class="field"><label>Échéance mensuelle</label><select><option>Le 1er du mois</option><option>Le 5 du mois</option><option>Le 10 du mois</option><option>Le 15 du mois</option></select></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-orange"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="card-title">Dépôt de Garantie</div></div></div>
+        <div class="field"><label>Montant</label><div class="amount-field"><span class="currency">€</span><input type="number" placeholder="850"></div></div>
+        <div class="field"><label>Équivalent</label><select><option>1 mois de loyer HC</option><option>2 mois de loyer HC</option></select></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Indexation IRL</div><div class="t-sub">Révision annuelle à la date anniversaire</div></div><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+      </div>
+    </section>
+
+    <section class="section" data-bail="vide" data-index="4"><!-- Clauses -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-blue"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div><div class="card-title">Obligations &amp; Clauses</div></div></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Animaux domestiques autorisés</div></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Sous-location interdite</div></div><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Assurance habitation obligatoire</div></div><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Travaux légers autorisés</div></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-dark"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div><div><div class="card-title">Clauses particulières</div></div></div>
+        <div class="field"><textarea placeholder="Ex : parking n°14 inclus, jardin à entretenir…"></textarea></div>
+      </div>
+    </section>
+
+    <section class="section" data-bail="vide" data-index="5"><!-- Signatures -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-dark"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/></svg></div><div><div class="card-title">Récapitulatif</div></div></div>
+        <div class="summary-line"><span class="sl-label">Type</span><span class="sl-value">Bail vide — 3 ans</span></div>
+        <div class="summary-line"><span class="sl-label">Loi applicable</span><span class="sl-value">Loi 89-462 du 6/07/1989</span></div>
+        <div class="summary-line"><span class="sl-label">Préavis bailleur</span><span class="sl-value">6 mois</span></div>
+        <div class="summary-line"><span class="sl-label">Préavis locataire</span><span class="sl-value">3 mois (1 mois zone tendue)</span></div>
+        <div class="summary-total" style="background:linear-gradient(135deg,var(--sky),var(--ink))"><span class="st-label">Loyer total / mois</span><span class="st-amount">930 €</span></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-blue"><svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></div><div><div class="card-title">Signature Bailleur</div></div></div>
+        <div class="sig-pad-wrap"><canvas class="sig-canvas" id="sig-v-bailleur"></canvas><div class="sig-placeholder" id="ph-v-bailleur"><svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg><span>Signez ici</span></div></div>
+        <div class="sig-actions"><button class="btn-sm" onclick="clearSig('sig-v-bailleur','ph-v-bailleur')">Effacer</button><button class="btn-sm primary" onclick="validateSig('sig-v-bailleur','ph-v-bailleur')">✓ Valider</button></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-green"><svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></div><div><div class="card-title">Signature Locataire</div></div></div>
+        <div class="sig-pad-wrap"><canvas class="sig-canvas" id="sig-v-locataire"></canvas><div class="sig-placeholder" id="ph-v-locataire"><svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg><span>Signez ici</span></div></div>
+        <div class="sig-actions"><button class="btn-sm" onclick="clearSig('sig-v-locataire','ph-v-locataire')">Effacer</button><button class="btn-sm primary" onclick="validateSig('sig-v-locataire','ph-v-locataire')">✓ Valider</button></div>
+      </div>
+      <div class="field-row" style="margin:0"><div class="field" style="margin:0"><label>Lieu</label><input type="text" placeholder="Paris"></div><div class="field" style="margin:0"><label>Date</label><input type="date"></div></div>
+    </section>
+  </div><!-- /screen-vide -->
+
+  <!-- ════════════════════════════════════════════════
+       BAIL MEUBLÉ
+  ════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-meuble">
+
+    <section class="section" data-bail="meuble" data-index="0"><!-- Parties -->
+      <div class="info-banner" style="background:rgba(56,168,122,.08);border-color:var(--success)"><svg viewBox="0 0 24 24" style="stroke:var(--success)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>Bail meublé — loi n°89-462. Durée <strong>1 an</strong>, renouvelable. Le logement doit comporter tous les meubles nécessaires à la vie courante (décret du 31/07/2015).</p></div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-dark"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="card-title">Le Bailleur</div></div></div>
+        <div class="field-row"><div class="field"><label>Nom</label><input type="text" placeholder="Dupont"></div><div class="field"><label>Prénom</label><input type="text" placeholder="Marie"></div></div>
+        <div class="field"><label>Adresse</label><input type="text" placeholder="12 rue des Lilas, 75001 Paris"></div>
+        <div class="field"><label>Téléphone</label><input type="tel" placeholder="+33 6 00 00 00 00"></div>
+        <div class="field"><label>E-mail</label><input type="email" placeholder="bailleur@email.fr"></div>
+        <div class="field"><label>IBAN</label><input type="text" placeholder="FR76 …"></div>
+      </div>
+      <div class="sec-divider"><span>Locataire</span></div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-green"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="card-title">Le Locataire</div></div></div>
+        <div class="field-row"><div class="field"><label>Nom</label><input type="text" placeholder="Martin"></div><div class="field"><label>Prénom</label><input type="text" placeholder="Lucas"></div></div>
+        <div class="field"><label>Adresse actuelle</label><input type="text" placeholder="Adresse avant emménagement"></div>
+        <div class="field"><label>Téléphone</label><input type="tel" placeholder="+33 6 00 00 00 00"></div>
+        <div class="field"><label>E-mail</label><input type="email" placeholder="locataire@email.fr"></div>
+        <div class="field"><label>Statut du locataire</label><select><option>Particulier</option><option>Étudiant</option><option>Salarié en mobilité</option></select></div>
+      </div>
+      <div class="sec-divider"><span>Pièces d'identité</span></div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon" style="background:linear-gradient(135deg,var(--success),#1a7a54)"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M14 9h4M14 13h3"/></svg></div><div><div class="card-title">Carte d'identité</div><div class="card-sub">Photographiez les CNI / passeports</div></div></div>
+        <div class="id-trigger-wrap">
+          <div class="id-trigger" id="id-trig-m-bailleur" onclick="openCamera('m-bailleur')"><div class="id-trigger-icon"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><img class="id-trigger-img" id="id-thumb-m-bailleur" alt=""><div class="id-badge">✓</div><div class="id-trigger-label">Bailleur</div></div>
+          <div class="id-trigger" id="id-trig-m-locataire" onclick="openCamera('m-locataire')"><div class="id-trigger-icon"><svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div><img class="id-trigger-img" id="id-thumb-m-locataire" alt=""><div class="id-badge">✓</div><div class="id-trigger-label">Locataire</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" data-bail="meuble" data-index="1"><!-- Logement + inventaire -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-green"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div><div class="card-title">Le Logement</div></div></div>
+        <div class="field"><label>Adresse complète</label><input type="text" placeholder="15 avenue Victor Hugo, Bât. A"></div>
+        <div class="field-row"><div class="field"><label>Code postal</label><input type="text" inputmode="numeric" placeholder="75016"></div><div class="field"><label>Ville</label><input type="text" placeholder="Paris"></div></div>
+        <div class="field-row"><div class="field"><label>Surface (m²)</label><input type="number" placeholder="35"></div><div class="field"><label>Nb pièces</label><input type="number" placeholder="2"></div></div>
+        <div class="field"><label>Classe énergétique (DPE)</label><select><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>F</option><option>G</option></select></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-orange"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-4 0v2M8 7V5a2 2 0 014 0v2"/></svg></div><div><div class="card-title">Inventaire du Mobilier</div><div class="card-sub">Obligatoire — décret du 31/07/2015</div></div></div>
+        <div class="info-banner warn"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><p>Le mobilier doit permettre au locataire de dormir, manger et vivre normalement.</p></div>
+        <div class="chips">
+          <div class="chip active" onclick="toggleChip(this)">Literie + couette</div><div class="chip active" onclick="toggleChip(this)">Volets / rideaux</div><div class="chip active" onclick="toggleChip(this)">Plaques cuisson</div><div class="chip active" onclick="toggleChip(this)">Four / micro-ondes</div><div class="chip active" onclick="toggleChip(this)">Réfrigérateur</div><div class="chip active" onclick="toggleChip(this)">Congélateur</div><div class="chip active" onclick="toggleChip(this)">Vaisselle</div><div class="chip active" onclick="toggleChip(this)">Ustensiles cuisine</div><div class="chip active" onclick="toggleChip(this)">Table + chaises</div><div class="chip active" onclick="toggleChip(this)">Rangements</div><div class="chip active" onclick="toggleChip(this)">Luminaires</div><div class="chip active" onclick="toggleChip(this)">Matériel entretien</div>
+          <div class="chip" onclick="toggleChip(this)">Lave-linge</div><div class="chip" onclick="toggleChip(this)">Lave-vaisselle</div><div class="chip" onclick="toggleChip(this)">Télévision</div><div class="chip" onclick="toggleChip(this)">Canapé</div><div class="chip" onclick="toggleChip(this)">Bureau + chaise</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" data-bail="meuble" data-index="2"><!-- Durée + finances -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-orange"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="card-title">Durée &amp; Loyer</div><div class="card-sub">1 an minimum</div></div></div>
+        <div class="field-row"><div class="field"><label>Entrée</label><input type="date"></div><div class="field"><label>Fin</label><input type="date"></div></div>
+        <div class="field"><label>Loyer meublé (tout inclus HC)</label><div class="amount-field"><span class="currency">€</span><input type="number" placeholder="1 200"></div></div>
+        <div class="field"><label>Charges (provisions)</label><div class="amount-field"><span class="currency">€</span><input type="number" placeholder="100"></div></div>
+        <div class="field"><label>Dépôt de garantie</label><div class="amount-field"><span class="currency">€</span><input type="number" placeholder="1 200"></div></div>
+        <div class="info-banner"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>Pour un bail meublé, le dépôt de garantie est limité à <strong>2 mois de loyer HC</strong>.</p></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Indexation IRL</div><div class="t-sub">Révision annuelle</div></div><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Zone tendue</div><div class="t-sub">Préavis locataire réduit à 1 mois</div></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+      </div>
+    </section>
+
+    <section class="section" data-bail="meuble" data-index="3"><!-- Signatures -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-dark"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/></svg></div><div><div class="card-title">Récapitulatif</div></div></div>
+        <div class="summary-line"><span class="sl-label">Type</span><span class="sl-value">Bail meublé — 1 an</span></div>
+        <div class="summary-line"><span class="sl-label">Préavis locataire</span><span class="sl-value">1 mois</span></div>
+        <div class="summary-line"><span class="sl-label">Préavis bailleur</span><span class="sl-value">3 mois</span></div>
+        <div class="summary-line"><span class="sl-label">Dépôt max</span><span class="sl-value">2 mois HC</span></div>
+        <div class="summary-total" style="background:linear-gradient(135deg,var(--success),#1a5e3f)"><span class="st-label">Loyer total / mois</span><span class="st-amount">1 300 €</span></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-green"><svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></div><div><div class="card-title">Signatures</div></div></div>
+        <div class="sec-divider"><span>Bailleur</span></div>
+        <div class="sig-pad-wrap"><canvas class="sig-canvas" id="sig-m-bailleur"></canvas><div class="sig-placeholder" id="ph-m-bailleur"><svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg><span>Signez ici</span></div></div>
+        <div class="sig-actions"><button class="btn-sm" onclick="clearSig('sig-m-bailleur','ph-m-bailleur')">Effacer</button><button class="btn-sm primary" onclick="validateSig('sig-m-bailleur','ph-m-bailleur')">✓ Valider</button></div>
+        <div class="sec-divider"><span>Locataire</span></div>
+        <div class="sig-pad-wrap"><canvas class="sig-canvas" id="sig-m-locataire"></canvas><div class="sig-placeholder" id="ph-m-locataire"><svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg><span>Signez ici</span></div></div>
+        <div class="sig-actions"><button class="btn-sm" onclick="clearSig('sig-m-locataire','ph-m-locataire')">Effacer</button><button class="btn-sm primary" onclick="validateSig('sig-m-locataire','ph-m-locataire')">✓ Valider</button></div>
+        <div class="field-row" style="margin-top:12px"><div class="field" style="margin:0"><label>Lieu</label><input type="text" placeholder="Paris"></div><div class="field" style="margin:0"><label>Date</label><input type="date"></div></div>
+      </div>
+    </section>
+
+  </div><!-- /screen-meuble -->
+
+  <!-- ════════════════════════════════════════════════
+       BAIL COMMERCIAL 3-6-9
+  ════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-commercial">
+
+    <section class="section" data-bail="commercial" data-index="0"><!-- Parties -->
+      <div class="info-banner warn"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><p>Bail commercial — C. com. art. L145-1 et s. Durée <strong>9 ans minimum</strong>, résiliable à chaque période triennale.</p></div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-dark"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="card-title">Le Bailleur</div><div class="card-sub">Propriétaire des locaux</div></div></div>
+        <div class="field-row"><div class="field"><label>Nom / Raison sociale</label><input type="text" placeholder="SCI Dupont Immobilier"></div><div class="field"><label>Forme juridique</label><input type="text" placeholder="SCI, SA, SAS…"></div></div>
+        <div class="field"><label>Siège social / Adresse</label><input type="text" placeholder="12 rue des Lilas, 75001 Paris"></div>
+        <div class="field-row"><div class="field"><label>SIRET</label><input type="text" inputmode="numeric" placeholder="123 456 789 00012"></div><div class="field"><label>RCS</label><input type="text" placeholder="Paris B 123 456 789"></div></div>
+        <div class="field"><label>Représentant légal</label><input type="text" placeholder="Nom, qualité"></div>
+        <div class="field"><label>E-mail</label><input type="email" placeholder="contact@sci.fr"></div>
+      </div>
+      <div class="sec-divider"><span>Preneur à bail</span></div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-orange"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg></div><div><div class="card-title">Le Preneur</div><div class="card-sub">Commerçant / artisan</div></div></div>
+        <div class="field-row"><div class="field"><label>Raison sociale</label><input type="text" placeholder="SARL Martin Restauration"></div><div class="field"><label>Forme juridique</label><input type="text" placeholder="SARL, SAS, EI…"></div></div>
+        <div class="field"><label>Siège social</label><input type="text" placeholder="Adresse du siège"></div>
+        <div class="field-row"><div class="field"><label>SIRET</label><input type="text" inputmode="numeric" placeholder="987 654 321 00012"></div><div class="field"><label>Code NAF</label><input type="text" placeholder="5610A"></div></div>
+        <div class="field"><label>Représentant légal</label><input type="text" placeholder="Nom, qualité"></div>
+        <div class="field"><label>Numéro RCS / RM</label><input type="text" placeholder="RCS Lyon B 987 654 321"></div>
+      </div>
+    </section>
+
+    <section class="section" data-bail="commercial" data-index="1"><!-- Locaux -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-orange"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg></div><div><div class="card-title">Désignation des Locaux</div></div></div>
+        <div class="field"><label>Adresse des locaux</label><input type="text" placeholder="15 rue du Commerce, 69001 Lyon"></div>
+        <div class="field-row"><div class="field"><label>Surface totale (m²)</label><input type="number" placeholder="120"></div><div class="field"><label>Dont surface commerciale</label><input type="number" placeholder="90"></div></div>
+        <div class="field"><label>Nature des locaux</label><select><option>Boutique / commerce de détail</option><option>Restaurant / bar</option><option>Bureau commercial</option><option>Entrepôt commercial</option><option>Local artisanal</option><option>Autre</option></select></div>
+        <div class="field"><label>Destination prévue au bail</label><input type="text" placeholder="Ex: vente et service de restauration rapide"></div>
+        <div class="field"><label>Activités autorisées</label><textarea placeholder="Décrire précisément les activités autorisées dans les locaux…"></textarea></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-green"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/></svg></div><div><div class="card-title">Équipements inclus</div></div></div>
+        <div class="chips">
+          <div class="chip" onclick="toggleChip(this)">Vitrine</div><div class="chip" onclick="toggleChip(this)">Cave</div><div class="chip" onclick="toggleChip(this)">Réserve</div><div class="chip" onclick="toggleChip(this)">WC clients</div><div class="chip" onclick="toggleChip(this)">WC personnel</div><div class="chip" onclick="toggleChip(this)">Parking</div><div class="chip" onclick="toggleChip(this)">Terrasse</div><div class="chip" onclick="toggleChip(this)">Extraction</div><div class="chip" onclick="toggleChip(this)">Climatisation</div><div class="chip" onclick="toggleChip(this)">Alarme</div><div class="chip" onclick="toggleChip(this)">Rideau métallique</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" data-bail="commercial" data-index="2"><!-- Durée + loyer -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-orange"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="card-title">Durée 3-6-9</div></div></div>
+        <div class="info-banner"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>Durée minimale 9 ans, résiliation possible à chaque période triennale avec <strong>6 mois de préavis</strong> par acte d'huissier.</p></div>
+        <div class="field-row"><div class="field"><label>Date d'entrée</label><input type="date"></div><div class="field"><label>1re échéance triennale</label><input type="date"></div></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Renonciation au droit de résiliation triennale</div><div class="t-sub">Le preneur renonce à la résiliation à 3 et 6 ans</div></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Droit au renouvellement</div><div class="t-sub">Droit au bail — art. L145-8</div></div><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-green"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div><div class="card-title">Loyer &amp; Révision</div></div></div>
+        <div class="field"><label>Loyer annuel (H.T. H.C.)</label><div class="amount-field"><span class="currency">€</span><input type="number" placeholder="24 000"></div></div>
+        <div class="field"><label>Loyer mensuel (H.T. H.C.)</label><div class="amount-field"><span class="currency">€</span><input type="number" placeholder="2 000"></div></div>
+        <div class="field"><label>TVA applicable</label><select><option>Non soumis à TVA</option><option>20 % (option TVA)</option></select></div>
+        <div class="field"><label>Indexation</label><select><option>ILAT (tertiaire)</option><option>ILC (commerces)</option><option>ICC (construction)</option><option>Sans indexation</option></select></div>
+        <div class="field"><label>Dépôt de garantie (nb de mois)</label><div class="amount-field"><span class="currency">€</span><input type="number" placeholder="6 000"></div></div>
+        <div class="sec-divider"><span>Charges et travaux</span></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Bail "triple net" (NNN)</div><div class="t-sub">Toutes charges à la charge du preneur</div></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Taxe foncière au preneur</div></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Assurance immeuble au preneur</div></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Travaux art. 606 C. civ. à la charge du preneur</div><div class="t-sub">Gros œuvre</div></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+      </div>
+    </section>
+
+    <section class="section" data-bail="commercial" data-index="3"><!-- Clauses spécifiques -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-dark"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div><div class="card-title">Clauses Spécifiques</div><div class="card-sub">Commercial</div></div></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Clause de déspécialisation partielle autorisée</div><div class="t-sub">Extension d'activité compatible</div></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Cession de bail autorisée</div><div class="t-sub">Avec accord préalable du bailleur</div></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Sous-location autorisée</div><div class="t-sub">Avec accord écrit du bailleur</div></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Clause recette (loyer variable)</div><div class="t-sub">% du CA en plus du loyer minimum</div></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Droit de préférence du preneur</div><div class="t-sub">En cas de vente des locaux</div></div><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-orange"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div><div><div class="card-title">Clauses additionnelles</div></div></div>
+        <div class="field"><textarea placeholder="Ex : travaux d'aménagement à réaliser avant entrée dans les lieux, franchise de loyer de 2 mois…"></textarea></div>
+      </div>
+    </section>
+
+    <section class="section" data-bail="commercial" data-index="4"><!-- Signatures -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-orange"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/></svg></div><div><div class="card-title">Récapitulatif</div></div></div>
+        <div class="summary-line"><span class="sl-label">Type</span><span class="sl-value">Bail commercial 3-6-9</span></div>
+        <div class="summary-line"><span class="sl-label">Statut</span><span class="sl-value">C. com. art. L145-1 et s.</span></div>
+        <div class="summary-line"><span class="sl-label">Résiliation triennale</span><span class="sl-value">6 mois préavis — huissier</span></div>
+        <div class="summary-line"><span class="sl-label">Indemnité d'éviction</span><span class="sl-value">Obligatoire sauf faute grave</span></div>
+        <div class="summary-total" style="background:linear-gradient(135deg,var(--accent),#8a6010)"><span class="st-label">Loyer annuel HT HC</span><span class="st-amount">24 000 €</span></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-orange"><svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></div><div><div class="card-title">Signatures</div></div></div>
+        <div class="info-banner warn"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><p>Un bail commercial doit être enregistré et peut requérir un acte notarié selon sa durée.</p></div>
+        <div class="sec-divider"><span>Bailleur</span></div>
+        <div class="sig-pad-wrap"><canvas class="sig-canvas" id="sig-c-bailleur"></canvas><div class="sig-placeholder" id="ph-c-bailleur"><svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg><span>Signez ici</span></div></div>
+        <div class="sig-actions"><button class="btn-sm" onclick="clearSig('sig-c-bailleur','ph-c-bailleur')">Effacer</button><button class="btn-sm primary" onclick="validateSig('sig-c-bailleur','ph-c-bailleur')">✓ Valider</button></div>
+        <div class="sec-divider"><span>Preneur</span></div>
+        <div class="sig-pad-wrap"><canvas class="sig-canvas" id="sig-c-preneur"></canvas><div class="sig-placeholder" id="ph-c-preneur"><svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg><span>Signez ici</span></div></div>
+        <div class="sig-actions"><button class="btn-sm" onclick="clearSig('sig-c-preneur','ph-c-preneur')">Effacer</button><button class="btn-sm primary" onclick="validateSig('sig-c-preneur','ph-c-preneur')">✓ Valider</button></div>
+        <div class="field-row" style="margin-top:12px"><div class="field" style="margin:0"><label>Lieu</label><input type="text" placeholder="Lyon"></div><div class="field" style="margin:0"><label>Date</label><input type="date"></div></div>
+      </div>
+    </section>
+
+  </div><!-- /screen-commercial -->
+
+  <!-- ════════════════════════════════════════════════
+       BAIL PROFESSIONNEL
+  ════════════════════════════════════════════════ -->
+  <div class="screen" id="screen-professionnel">
+
+    <section class="section" data-bail="professionnel" data-index="0"><!-- Parties -->
+      <div class="info-banner" style="background:rgba(155,89,182,.08);border-color:#9B59B6"><svg viewBox="0 0 24 24" style="stroke:#9B59B6"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>Bail professionnel — art. 57 A loi du 23/12/1986. Réservé aux <strong>professions libérales réglementées</strong> (médecin, avocat, notaire…). Durée <strong>6 ans minimum</strong>.</p></div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-dark"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><div class="card-title">Le Bailleur</div></div></div>
+        <div class="field-row"><div class="field"><label>Nom / Raison sociale</label><input type="text" placeholder="SCI Victor Hugo"></div><div class="field"><label>Forme juridique</label><input type="text" placeholder="SCI, Particulier…"></div></div>
+        <div class="field"><label>Adresse</label><input type="text" placeholder="10 avenue Foch, 75116 Paris"></div>
+        <div class="field"><label>Représentant</label><input type="text" placeholder="Nom et qualité"></div>
+        <div class="field"><label>E-mail</label><input type="email" placeholder="bailleur@email.fr"></div>
+      </div>
+      <div class="sec-divider"><span>Preneur (professionnel)</span></div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-purple"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/></svg></div><div><div class="card-title">Le Preneur</div><div class="card-sub">Professionnel libéral</div></div></div>
+        <div class="field-row"><div class="field"><label>Nom / Raison sociale</label><input type="text" placeholder="Dr. Dupont Marie"></div><div class="field"><label>Profession</label><select><option>Médecin</option><option>Avocat</option><option>Notaire</option><option>Expert-comptable</option><option>Architecte</option><option>Kinésithérapeute</option><option>Psychologue</option><option>Autre profession libérale</option></select></div></div>
+        <div class="field"><label>Numéro RPPS / Ordre</label><input type="text" placeholder="N° d'inscription à l'ordre professionnel"></div>
+        <div class="field"><label>Siège / Adresse</label><input type="text" placeholder="Adresse actuelle du cabinet"></div>
+        <div class="field-row"><div class="field"><label>SIRET</label><input type="text" inputmode="numeric" placeholder="123 456 789 00012"></div><div class="field"><label>Code NAF</label><input type="text" placeholder="8621Z"></div></div>
+        <div class="field"><label>E-mail</label><input type="email" placeholder="cabinet@pro.fr"></div>
+      </div>
+    </section>
+
+    <section class="section" data-bail="professionnel" data-index="1"><!-- Locaux -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-purple"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div><div class="card-title">Désignation des Locaux</div></div></div>
+        <div class="field"><label>Adresse des locaux</label><input type="text" placeholder="25 boulevard Haussmann, 75009 Paris"></div>
+        <div class="field-row"><div class="field"><label>Surface (m²)</label><input type="number" placeholder="80"></div><div class="field"><label>Nb pièces</label><input type="number" placeholder="4"></div></div>
+        <div class="field"><label>Étage / Accès</label><input type="text" placeholder="2ème étage, ascenseur, accès PMR"></div>
+        <div class="field"><label>Nature des locaux</label><select><option>Bureau professionnel</option><option>Cabinet médical / paramédical</option><option>Cabinet juridique</option><option>Cabinet comptable</option><option>Studio / Cabinet polyvalent</option></select></div>
+        <div class="field"><label>Destination exclusive</label><input type="text" placeholder="Ex: exercice de la médecine générale"></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-green"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/></svg></div><div><div class="card-title">Équipements</div></div></div>
+        <div class="chips">
+          <div class="chip" onclick="toggleChip(this)">Salle d'attente</div><div class="chip" onclick="toggleChip(this)">Salle de soins</div><div class="chip" onclick="toggleChip(this)">Secrétariat</div><div class="chip" onclick="toggleChip(this)">WC patients</div><div class="chip" onclick="toggleChip(this)">Accès PMR</div><div class="chip" onclick="toggleChip(this)">Parking</div><div class="chip" onclick="toggleChip(this)">Interphone</div><div class="chip" onclick="toggleChip(this)">Vidéophone</div><div class="chip" onclick="toggleChip(this)">Fibre optique</div><div class="chip" onclick="toggleChip(this)">Climatisation</div><div class="chip" onclick="toggleChip(this)">Alarme</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" data-bail="professionnel" data-index="2"><!-- Durée + loyer -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-purple"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="card-title">Durée &amp; Résiliation</div><div class="card-sub">6 ans minimum</div></div></div>
+        <div class="info-banner" style="background:rgba(155,89,182,.08);border-color:#9B59B6"><svg viewBox="0 0 24 24" style="stroke:#9B59B6"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><p>Préavis de <strong>6 mois</strong> pour le preneur (LRAR ou huissier). Pas de droit au renouvellement ni d'indemnité d'éviction, contrairement au bail commercial.</p></div>
+        <div class="field-row"><div class="field"><label>Date d'entrée</label><input type="date"></div><div class="field"><label>Date d'échéance</label><input type="date"></div></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Tacite reconduction</div><div class="t-sub">Par périodes de 1 an après les 6 ans</div></div><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Partage du cabinet autorisé</div><div class="t-sub">Avec un autre professionnel libéral</div></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-green"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div><div class="card-title">Loyer &amp; Charges</div></div></div>
+        <div class="field"><label>Loyer mensuel H.T.</label><div class="amount-field"><span class="currency">€</span><input type="number" placeholder="2 500"></div></div>
+        <div class="field"><label>Charges mensuelles</label><div class="amount-field"><span class="currency">€</span><input type="number" placeholder="200"></div></div>
+        <div class="field"><label>TVA applicable</label><select><option>Non soumis à TVA (usage libéral)</option><option>20 % (option TVA bailleur)</option></select></div>
+        <div class="field"><label>Indexation</label><select><option>ILAT (indice tertiaire)</option><option>ICC</option><option>Sans indexation</option></select></div>
+        <div class="field"><label>Dépôt de garantie</label><div class="amount-field"><span class="currency">€</span><input type="number" placeholder="5 000"></div></div>
+        <div class="sec-divider"><span>Répartition des charges</span></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Charges locatives au preneur</div><div class="t-sub">Eau, électricité, entretien courant</div></div><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Taxe foncière au preneur</div></div><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+        <div class="toggle-row"><div class="toggle-info"><div class="t-label">Assurance PNO au bailleur</div><div class="t-sub">Propriétaire Non Occupant</div></div><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+      </div>
+    </section>
+
+    <section class="section" data-bail="professionnel" data-index="3"><!-- Signatures -->
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-purple"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/></svg></div><div><div class="card-title">Récapitulatif</div></div></div>
+        <div class="summary-line"><span class="sl-label">Type</span><span class="sl-value">Bail professionnel</span></div>
+        <div class="summary-line"><span class="sl-label">Base légale</span><span class="sl-value">Art. 57A loi 23/12/1986</span></div>
+        <div class="summary-line"><span class="sl-label">Durée minimum</span><span class="sl-value">6 ans</span></div>
+        <div class="summary-line"><span class="sl-label">Préavis</span><span class="sl-value">6 mois (LRAR / huissier)</span></div>
+        <div class="summary-line"><span class="sl-label">Indemnité d'éviction</span><span class="sl-value">Non applicable</span></div>
+        <div class="summary-total" style="background:linear-gradient(135deg,#9B59B6,#5e2a7e)"><span class="st-label">Loyer total / mois</span><span class="st-amount">2 700 €</span></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-icon ic-purple"><svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></div><div><div class="card-title">Signatures</div></div></div>
+        <div class="sec-divider"><span>Bailleur</span></div>
+        <div class="sig-pad-wrap"><canvas class="sig-canvas" id="sig-p-bailleur"></canvas><div class="sig-placeholder" id="ph-p-bailleur"><svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg><span>Signez ici</span></div></div>
+        <div class="sig-actions"><button class="btn-sm" onclick="clearSig('sig-p-bailleur','ph-p-bailleur')">Effacer</button><button class="btn-sm primary" onclick="validateSig('sig-p-bailleur','ph-p-bailleur')">✓ Valider</button></div>
+        <div class="sec-divider"><span>Preneur</span></div>
+        <div class="sig-pad-wrap"><canvas class="sig-canvas" id="sig-p-preneur"></canvas><div class="sig-placeholder" id="ph-p-preneur"><svg viewBox="0 0 24 24"><path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg><span>Signez ici</span></div></div>
+        <div class="sig-actions"><button class="btn-sm" onclick="clearSig('sig-p-preneur','ph-p-preneur')">Effacer</button><button class="btn-sm primary" onclick="validateSig('sig-p-preneur','ph-p-preneur')">✓ Valider</button></div>
+        <div class="field-row" style="margin-top:12px"><div class="field" style="margin:0"><label>Lieu</label><input type="text" placeholder="Paris"></div><div class="field" style="margin:0"><label>Date</label><input type="date"></div></div>
+      </div>
+    </section>
+
+  </div><!-- /screen-professionnel -->
+
+</div><!-- /scroll -->
+
+<!-- BOTTOM NAV -->
+<div id="bottomnav">
+  <button class="btn-back" id="btn-back" onclick="prevSection()">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <button class="btn-pdf" id="btn-pdf" onclick="generatePDF()" style="display:none" title="Générer PDF">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+  </button>
+  <button class="btn-next" id="btn-next" onclick="nextSection()">
+    <span id="btn-label">Suivant</span>
+    <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+</div>
+
+<div id="toast"></div>
+
+<!-- CAMERA MODAL -->
+<div class="id-modal-overlay" id="id-modal">
+  <div class="id-modal-header">
+    <div><div class="id-modal-title">Carte d'identité</div><div class="id-modal-sub" id="id-modal-sub">Bailleur — Recto</div></div>
+    <button class="id-close" onclick="closeCamera()">&#x2715;</button>
+  </div>
+  <div class="id-viewfinder">
+    <video id="id-video" autoplay playsinline muted></video>
+    <img id="id-photo-preview" alt="">
+    <div class="id-frame-overlay">
+      <div class="id-frame"><div class="id-frame-inner"></div></div>
+      <div class="id-scan-line" id="id-scan-line"></div>
+      <div class="id-hint" id="id-hint">Cadrez la carte dans le rectangle</div>
+    </div>
+  </div>
+  <div class="id-controls">
+    <div class="id-party-tabs">
+      <button class="id-tab active" id="tab-recto" onclick="setFace('recto')">Recto</button>
+      <button class="id-tab" id="tab-verso" onclick="setFace('verso')">Verso</button>
+    </div>
+    <div class="id-btns" id="id-btns-capture">
+      <button class="id-btn-flip" onclick="flipCamera()">
+        <svg viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 013.51 15"/></svg>
+      </button>
+      <button class="id-btn-capture" onclick="capturePhoto()">
+        <svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Photographier
+      </button>
+    </div>
+    <div class="id-btns" id="id-btns-review" style="display:none">
+      <button class="id-btn-retake" onclick="retakePhoto()">&#x21A9; Reprendre</button>
+      <button class="id-btn-confirm" onclick="confirmPhoto()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+        Utiliser
+      </button>
+    </div>
+  </div>
+</div>
+<canvas id="id-canvas" style="display:none"></canvas>
+
+</div><!-- /app -->
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────────────
+const BAIL_CONFIG = {
+  vide: {
+    name: 'Bail vide', color: '#1B6CA8',
+    steps: ['Parties','Logement','Durée','Finances','Clauses','Signatures']
+  },
+  meuble: {
+    name: 'Bail meublé', color: '#38A87A',
+    steps: ['Parties','Logement & mobilier','Durée & loyer','Signatures']
+  },
+  commercial: {
+    name: 'Bail commercial', color: '#E8A838',
+    steps: ['Parties','Locaux','Durée & loyer','Clauses','Signatures']
+  },
+  professionnel: {
+    name: 'Bail professionnel', color: '#9B59B6',
+    steps: ['Parties','Locaux','Durée & loyer','Signatures']
+  }
+};
+
+let activeBail = null;
+let current = 0;
+
+// ── NAVIGATION ─────────────────────────────────────────────────────────
+function startBail(type) {
+  activeBail = type;
+  current = 0;
+  const cfg = BAIL_CONFIG[type];
+
+  document.getElementById('nav-title').textContent = cfg.name;
+  document.getElementById('btn-next').style.background =
+    `linear-gradient(135deg,${cfg.color},#0D1B2A 130%)`;
+
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-home').classList.remove('active');
+  document.getElementById(`screen-${type}`).classList.add('active');
+
+  document.getElementById('topnav').style.display = 'block';
+  document.getElementById('progress-wrap').style.display = 'block';
+  document.getElementById('bottomnav').style.display = 'flex';
+
+  showSection();
+  initAllSignatures();
+  setTodayDates();
+}
+
+function backToHome() {
+  activeBail = null;
+  current = 0;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-home').classList.add('active');
+  document.getElementById('topnav').style.display = 'none';
+  document.getElementById('progress-wrap').style.display = 'none';
+  document.getElementById('bottomnav').style.display = 'none';
+  document.getElementById('scroll').scrollTop = 0;
+}
+
+function showSection() {
+  if (!activeBail) return;
+  const cfg = BAIL_CONFIG[activeBail];
+  const sections = document.querySelectorAll(`#screen-${activeBail} .section`);
+  sections.forEach(s => s.classList.remove('active'));
+  sections[current].classList.add('active');
+  document.getElementById('scroll').scrollTop = 0;
+
+  // progress
+  const wrap = document.getElementById('progress-steps');
+  wrap.innerHTML = cfg.steps.map((s, i) => {
+    let cls = i < current ? 'done' : i === current ? 'active' : '';
+    return `<div class="progress-step ${cls}"></div>`;
+  }).join('');
+  document.getElementById('p-step').textContent = `Étape ${current + 1} / ${cfg.steps.length}`;
+  document.getElementById('p-name').textContent = cfg.steps[current];
+  document.getElementById('section-label').textContent = cfg.steps[current];
+
+  document.getElementById('btn-back').style.display = current > 0 ? 'flex' : 'none';
+  document.getElementById('btn-label').textContent =
+    current === cfg.steps.length - 1 ? 'Générer le bail' : 'Suivant';
+  document.getElementById('btn-pdf').style.display =
+    current === cfg.steps.length - 1 ? 'flex' : 'none';
+}
+
+function nextSection() {
+  if (!activeBail) return;
+  const steps = BAIL_CONFIG[activeBail].steps.length;
+  if (current === steps - 1) { showToast('✓ Bail généré avec succès !'); return; }
+  current++;
+  showSection();
+}
+
+function prevSection() {
+  if (current === 0) { backToHome(); return; }
+  current--;
+  showSection();
+}
+
+// ── HELPERS ────────────────────────────────────────────────────────────
+function toggleChip(el) { el.classList.toggle('active'); }
+function toggleCheck(row) { row.querySelector('.check-box').classList.toggle('checked'); }
+
+function setTodayDates() {
+  const today = new Date().toISOString().split('T')[0];
+  document.querySelectorAll('input[type=date]').forEach(el => { if (!el.value) el.value = today; });
+}
+
+function updateTime() {
+  const now = new Date();
+  document.getElementById('sb-time').textContent =
+    String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+}
+
+// ── SIGNATURES ─────────────────────────────────────────────────────────
+function initAllSignatures() {
+  document.querySelectorAll('.sig-canvas').forEach(canvas => {
+    if (canvas.dataset.inited) return;
+    canvas.dataset.inited = '1';
+    const ctx = canvas.getContext('2d');
+    let drawing = false, lastX = 0, lastY = 0;
+    function resize() {
+      const r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio||1;
+      canvas.width = r.width*dpr; canvas.height = r.height*dpr;
+      ctx.scale(dpr,dpr); ctx.strokeStyle='#0D1B2A'; ctx.lineWidth=2; ctx.lineCap='round'; ctx.lineJoin='round';
+    }
+    resize();
+    function pos(e) { const r=canvas.getBoundingClientRect(),t=e.touches?e.touches[0]:e; return {x:t.clientX-r.left,y:t.clientY-r.top}; }
+    function start(e) { e.preventDefault(); drawing=true; const p=pos(e); lastX=p.x; lastY=p.y; const ph=canvas.nextElementSibling; if(ph) ph.style.opacity='0'; }
+    function draw(e) { if(!drawing) return; e.preventDefault(); const p=pos(e); ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(p.x,p.y); ctx.stroke(); lastX=p.x; lastY=p.y; }
+    function stop() { drawing=false; }
+    canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',draw); canvas.addEventListener('mouseup',stop);
+    canvas.addEventListener('touchstart',start,{passive:false}); canvas.addEventListener('touchmove',draw,{passive:false}); canvas.addEventListener('touchend',stop);
+  });
+}
+
+function clearSig(cId, pId) {
+  const c = document.getElementById(cId); c.getContext('2d').clearRect(0,0,c.width,c.height);
+  document.getElementById(pId).style.opacity='1';
+}
+function validateSig(cId, pId) {
+  const c = document.getElementById(cId);
+  const d = c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+  if (!Array.from(d).some((v,i)=>i%4===3&&v>0)) { showToast('Veuillez signer avant de valider'); return; }
+  showToast('✓ Signature enregistrée');
+}
+
+// ── CAMERA ─────────────────────────────────────────────────────────────
+let camStream=null, camFacing='environment', camParty='bailleur', camFace='recto';
+const capturedPhotos={};
+
+async function openCamera(party) {
+  camParty=party; camFace='recto';
+  document.getElementById('id-modal').classList.add('open');
+  updateModalLabel(); setFaceUI('recto'); await startStream();
+}
+function closeCamera() { document.getElementById('id-modal').classList.remove('open'); stopStream(); showViewfinder(); }
+async function startStream() {
+  stopStream();
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:camFacing},audio:false});
+    const v=document.getElementById('id-video'); v.srcObject=camStream; v.style.display='block';
+    document.getElementById('id-photo-preview').style.display='none'; showViewfinder();
+  } catch(e) { document.getElementById('id-video').style.display='none'; showToast('Autorisation caméra requise — utilisez la galerie'); }
+}
+function stopStream() { if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;} }
+function flipCamera() { camFacing=camFacing==='environment'?'user':'environment'; startStream(); }
+function setFace(f) { camFace=f; setFaceUI(f); updateModalLabel(); showViewfinder(); }
+function setFaceUI(f) { document.getElementById('tab-recto').classList.toggle('active',f==='recto'); document.getElementById('tab-verso').classList.toggle('active',f==='verso'); }
+function updateModalLabel() {
+  const party=camParty.includes('bailleur')?'Bailleur':'Locataire / Preneur';
+  document.getElementById('id-modal-sub').textContent=`${party} — ${camFace==='recto'?'Recto':'Verso'}`;
+}
+function showViewfinder() {
+  document.getElementById('id-btns-capture').style.display='flex';
+  document.getElementById('id-btns-review').style.display='none';
+  document.getElementById('id-scan-line').style.display='block';
+  document.getElementById('id-hint').textContent='Cadrez la carte dans le rectangle';
+  if(camStream){document.getElementById('id-video').style.display='block';document.getElementById('id-photo-preview').style.display='none';}
+}
+function capturePhoto() {
+  const video=document.getElementById('id-video'), canvas=document.getElementById('id-canvas');
+  if(!camStream||video.videoWidth===0) {
+    const inp=document.createElement('input'); inp.type='file'; inp.accept='image/*'; inp.capture='environment';
+    inp.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>usePhotoData(ev.target.result);r.readAsDataURL(f);}; inp.click(); return;
+  }
+  canvas.width=video.videoWidth; canvas.height=video.videoHeight;
+  canvas.getContext('2d').drawImage(video,0,0);
+  usePhotoData(canvas.toDataURL('image/jpeg',0.9));
+}
+function usePhotoData(dataURL) {
+  const prev=document.getElementById('id-photo-preview'); prev.src=dataURL; prev.style.display='block';
+  document.getElementById('id-video').style.display='none';
+  document.getElementById('id-btns-capture').style.display='none';
+  document.getElementById('id-btns-review').style.display='flex';
+  document.getElementById('id-scan-line').style.display='none';
+  document.getElementById('id-hint').textContent='Vérifiez la lisibilité de la carte';
+  capturedPhotos[`${camParty}-${camFace}-temp`]=dataURL;
+}
+function retakePhoto() { delete capturedPhotos[`${camParty}-${camFace}-temp`]; showViewfinder(); if(camStream){document.getElementById('id-video').style.display='block';document.getElementById('id-photo-preview').style.display='none';} }
+function confirmPhoto() {
+  const key=`${camParty}-${camFace}`, temp=`${key}-temp`, dataURL=capturedPhotos[temp];
+  if(!dataURL) return;
+  capturedPhotos[key]=dataURL; delete capturedPhotos[temp];
+  if(camFace==='recto') {
+    const thumb=document.getElementById(`id-thumb-${camParty}`), trig=document.getElementById(`id-trig-${camParty}`);
+    if(thumb){thumb.src=dataURL;} if(trig) trig.classList.add('captured');
+  }
+  showToast(`✓ ${camFace==='recto'?'Recto':'Verso'} enregistré`);
+  if(camFace==='recto'){setFace('verso');if(camStream){document.getElementById('id-video').style.display='block';document.getElementById('id-photo-preview').style.display='none';}}
+  else{showToast('✓ Pièce d\'identité complète !');setTimeout(closeCamera,800);}
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────
+updateTime(); setInterval(updateTime,30000); setTodayDates();
+
+// ── FIX SIGNATURES — reinit après changement de section ────────────────
+function reinitSig(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas || canvas.dataset.inited2) return;
+  canvas.dataset.inited2 = '1';
+  const ctx = canvas.getContext('2d');
+  let drawing = false, lastX = 0, lastY = 0;
+  function resize() {
+    const r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio||1;
+    if (r.width === 0) return;
+    canvas.width = r.width * dpr; canvas.height = r.height * dpr;
+    ctx.scale(dpr, dpr); ctx.strokeStyle = '#0D1B2A'; ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  }
+  setTimeout(resize, 100);
+  function pos(e) {
+    const r = canvas.getBoundingClientRect();
+    const t = e.touches ? e.touches[0] : e;
+    return { x: t.clientX - r.left, y: t.clientY - r.top };
+  }
+  function start(e) {
+    e.preventDefault(); e.stopPropagation();
+    resize();
+    drawing = true;
+    const p = pos(e); lastX = p.x; lastY = p.y;
+    const ph = document.getElementById(canvasId.replace('sig-','ph-'));
+    if (ph) ph.style.opacity = '0';
+  }
+  function draw(e) {
+    if (!drawing) return;
+    e.preventDefault(); e.stopPropagation();
+    const p = pos(e);
+    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(p.x, p.y); ctx.stroke();
+    lastX = p.x; lastY = p.y;
+  }
+  function stop(e) { drawing = false; }
+  canvas.addEventListener('mousedown', start, { passive: false });
+  canvas.addEventListener('mousemove', draw, { passive: false });
+  canvas.addEventListener('mouseup', stop);
+  canvas.addEventListener('mouseleave', stop);
+  canvas.addEventListener('touchstart', start, { passive: false });
+  canvas.addEventListener('touchmove', draw, { passive: false });
+  canvas.addEventListener('touchend', stop, { passive: false });
+}
+
+// Appel auto sur toutes les sections signatures
+document.querySelectorAll('.sig-canvas').forEach(c => {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(en => { if (en.isIntersecting) reinitSig(c.id); });
+  }, { threshold: 0.1 });
+  obs.observe(c);
+});
+
+// ── CAMÉRA DOCUMENTS ────────────────────────────────────────────────────
+let docCamStream = null, docCamTarget = null;
+
+function openDocCamera(targetId) {
+  docCamTarget = targetId;
+  const modal = document.getElementById('doc-cam-modal');
+  modal.classList.add('open');
+  startDocStream();
+}
+
+function closeDocCamera() {
+  document.getElementById('doc-cam-modal').classList.remove('open');
+  if (docCamStream) { docCamStream.getTracks().forEach(t => t.stop()); docCamStream = null; }
+  document.getElementById('doc-cam-review').style.display = 'none';
+  document.getElementById('doc-cam-live').style.display = 'block';
+  document.getElementById('doc-btns-capture').style.display = 'flex';
+  document.getElementById('doc-btns-review').style.display = 'none';
+}
+
+async function startDocStream() {
+  if (docCamStream) { docCamStream.getTracks().forEach(t => t.stop()); }
+  try {
+    docCamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+    document.getElementById('doc-cam-video').srcObject = docCamStream;
+    document.getElementById('doc-cam-live').style.display = 'block';
+    document.getElementById('doc-cam-review').style.display = 'none';
+  } catch(e) {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*'; inp.capture = 'environment';
+    inp.onchange = ev => { const f = ev.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = e2 => useDocPhoto(e2.target.result); r.readAsDataURL(f); };
+    inp.click();
+    closeDocCamera();
+  }
+}
+
+function captureDocPhoto() {
+  const video = document.getElementById('doc-cam-video');
+  const canvas = document.getElementById('doc-cam-canvas');
+  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  const dataURL = canvas.toDataURL('image/jpeg', 0.85);
+  document.getElementById('doc-cam-preview').src = dataURL;
+  document.getElementById('doc-cam-live').style.display = 'none';
+  document.getElementById('doc-cam-review').style.display = 'block';
+  document.getElementById('doc-btns-capture').style.display = 'none';
+  document.getElementById('doc-btns-review').style.display = 'flex';
+}
+
+function retakeDocPhoto() {
+  document.getElementById('doc-cam-live').style.display = 'block';
+  document.getElementById('doc-cam-review').style.display = 'none';
+  document.getElementById('doc-btns-capture').style.display = 'flex';
+  document.getElementById('doc-btns-review').style.display = 'none';
+}
+
+function confirmDocPhoto() {
+  const dataURL = document.getElementById('doc-cam-preview').src;
+  if (docCamTarget) {
+    const el = document.getElementById(docCamTarget);
+    if (el) { el.src = dataURL; el.style.display = 'block'; el.parentElement.classList.add('captured'); }
+  }
+  showToast('✓ Photo enregistrée');
+  closeDocCamera();
+}
+
+// ── GÉNÉRATION PDF ──────────────────────────────────────────────────────
+async function generatePDF() {
+  showToast('Génération du PDF en cours...');
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const cfg = BAIL_CONFIG[activeBail];
+  const sections = document.querySelectorAll(`#screen-${activeBail} .section`);
+  const pageW = 210, margin = 15, contentW = pageW - margin * 2;
+  let y = 20;
+
+  // Couleurs selon type
+  const colors = { vide: [27,108,168], meuble: [56,168,122], commercial: [232,168,56], professionnel: [155,89,182] };
+  const c = colors[activeBail] || [27,108,168];
+
+  // En-tête
+  doc.setFillColor(...c);
+  doc.rect(0, 0, 210, 30, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(20); doc.setFont('helvetica','bold');
+  doc.text(cfg.name.toUpperCase(), margin, 18);
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text(`Généré le ${new Date().toLocaleDateString('fr-FR')}`, 210 - margin, 18, { align: 'right' });
+  y = 40;
+
+  // Collecter tous les champs remplis
+  sections.forEach((section, si) => {
+    const stepName = cfg.steps[si] || `Section ${si+1}`;
+    // Titre de section
+    doc.setFillColor(...c.map(v => Math.min(255, v+100)));
+    doc.rect(margin, y-4, contentW, 8, 'F');
+    doc.setTextColor(...c);
+    doc.setFontSize(11); doc.setFont('helvetica','bold');
+    doc.text(stepName.toUpperCase(), margin+2, y+1);
+    y += 10;
+
+    // Champs
+    section.querySelectorAll('input, select, textarea').forEach(field => {
+      const label = field.closest('.field')?.querySelector('label')?.textContent || field.placeholder || '';
+      const value = field.value || '—';
+      if (!label) return;
+      if (y > 270) { doc.addPage(); y = 20; }
+      doc.setTextColor(100,100,100); doc.setFontSize(8); doc.setFont('helvetica','normal');
+      doc.text(label, margin, y);
+      doc.setTextColor(30,30,30); doc.setFontSize(9); doc.setFont('helvetica','bold');
+      doc.text(value.substring(0,80), margin + 60, y);
+      doc.setDrawColor(220,220,220); doc.line(margin, y+1, margin+contentW, y+1);
+      y += 7;
+    });
+
+    // Chips actives
+    const chips = [...section.querySelectorAll('.chip.active')].map(c => c.textContent).join(', ');
+    if (chips) {
+      if (y > 270) { doc.addPage(); y = 20; }
+      doc.setTextColor(100,100,100); doc.setFontSize(8); doc.setFont('helvetica','normal');
+      doc.text('Équipements :', margin, y);
+      doc.setTextColor(30,30,30); doc.setFontSize(8); doc.setFont('helvetica','bold');
+      const lines = doc.splitTextToSize(chips, contentW - 60);
+      doc.text(lines, margin + 60, y);
+      y += lines.length * 5 + 3;
+    }
+
+    // Signatures
+    section.querySelectorAll('.sig-canvas').forEach(canvas => {
+      const data = canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+      const hasSig = Array.from(data).some((v,i) => i%4===3 && v>0);
+      if (hasSig) {
+        if (y > 250) { doc.addPage(); y = 20; }
+        const imgData = canvas.toDataURL('image/png');
+        doc.setTextColor(100,100,100); doc.setFontSize(8);
+        doc.text('Signature :', margin, y);
+        try { doc.addImage(imgData, 'PNG', margin+60, y-5, 60, 20); } catch(e) {}
+        y += 25;
+      }
+    });
+
+    // Photos CNI
+    section.querySelectorAll('.id-trigger-img[src]').forEach(img => {
+      if (img.src && img.src.startsWith('data:')) {
+        if (y > 240) { doc.addPage(); y = 20; }
+        try { doc.addImage(img.src, 'JPEG', margin, y, 80, 50); y += 55; } catch(e) {}
+      }
+    });
+    y += 5;
+  });
+
+  // Pied de page sur toutes les pages
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setFillColor(...c);
+    doc.rect(0, 287, 210, 10, 'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(8);
+    doc.text(`${cfg.name} — Page ${i}/${totalPages}`, 105, 293, { align: 'center' });
+  }
+
+  doc.save(`bail_${activeBail}_${new Date().toISOString().split('T')[0]}.pdf`);
+  showToast('✓ PDF téléchargé !');
+}
+</script>
+
+<!-- jsPDF CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- MODAL CAMÉRA DOCUMENTS -->
+<style>
+#doc-cam-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:300;display:flex
